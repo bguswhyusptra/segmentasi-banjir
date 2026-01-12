@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUL Prediction Result</title>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: aliceblue; margin-top: 100px;">RUL Prediction Result</h1>
+        <p  class="result">Combined Value: {{ combined }}</p>
+        <p  class="result">Predicted RUL: {{ predicted_rul }}</p>
+        <br>
+        <a href="/">Back to Predict</a>
+    </div>
+</body>
+</html>
+
+<style>
+    .container{
+        width: 100%;height: 100vh;
+        display: flex;flex-direction: column;align-items: center;
+        background-color: rgb(37, 37, 96);
+        
+    }
+    .part1,.part2{width: 20%;}
+    form{
+        width: 100%;
+        display: flex;flex-direction: row;justify-content: center; gap: 20px;
+    }
+    input{
+        width: 100%;
+        height: 5vh;
+        border-radius: 5px;
+        border: solid 2px;
+        box-shadow: 8px 8px 3px rgba(0, 0, 0, 0.2);
+    }
+    .btn{
+        margin-left: 5%;
+        width: 10%;
+        height: 10vh;
+        border-radius: 10px;
+        border: rgb(117, 133, 196);
+        background-color: rgb(137, 155, 225);
+        box-shadow: 8px 8px 3px rgba(0, 0, 0, 0.2); /* Properti untuk bayangan */
+    }
+    label{color: aliceblue;}
+    .btn:hover{
+        background-color: rgb(59, 80, 165);
+        border: rgb(117, 133, 196);
+    }
+    .result{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: aliceblue;
+        width: 18%;
+        height: 10vh;
+        border-radius: 20px;
+    }
+    a {list-style: none; font-style: none;text-decoration: none;color: aliceblue;font-size: 40px;
+        margin-top: 80px;}
+</style>
+
+

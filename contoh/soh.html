@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <div class="box-1">
+                <h1>State of Health</h1>
+                <h1 class="value">value</h1>
+            </div>
+            <span class="line"></span>
+            <div class="box-1">
+                <h1>REMAIING USEFUL LIFETIME</h1>
+                <h1 class="value">value</h1>
+            </div>
+        </div>
+        <div class="box2">
+            <div class="box2-1">
+                <h2>CURRENT</h2>
+                <h2>VALUE</h2>
+                <span></span>
+            </div>
+            <div class="box2-1">
+                <h2>CURRENT</h2>
+                <h2>VALUE</h2>
+                <span></span>
+            </div>
+            <div class="box2-1">
+                <h2>CURRENT</h2>
+                <h2>VALUE</h2>
+                <span></span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;  
+      }
+      .container{
+          background-color: rgb(50, 50, 177);
+          height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          gap: 50px;
+      }
+      .box{
+        background-color: rgb(19, 19, 88);
+        padding: 80px;
+        width: 80%;
+        display: flex;
+        flex-direction: row;
+        border-radius: 20px;
+        text-align: center;
+        color: aliceblue;
+        justify-content: space-around;
+        overflow-y: hidden;
+      }
+      .box2{
+        gap: 10%;
+        padding: 0px;
+        width: 90%;
+        display: flex;
+        flex-direction: row;
+        border-radius: 20px;
+        text-align: center;
+        color: aliceblue;
+        justify-content: center;
+      }
+      .box-1{
+        display: flex;
+        flex-direction: columnz;
+        align-items: center;
+        justify-content: center;
+      }
+      .box2-1{
+        background-color: rgb(19, 19, 88);
+        padding: 50px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 20px;
+        text-align: center;
+        color: aliceblue;
+      }
+      
+      a{
+        text-decoration: none;
+        background: linear-gradient(to right, rgb(20, 205, 165), rgb(2, 136, 213));
+        color: rgb(255, 255, 255);
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-size: 30px;
+        width: 25%;
+        padding: 20px;
+        text-align:center ;
+        border-radius: 20px;
+      }
+      .button{
+        justify-content: center;
+        gap: 30px;
+        display: flex;
+        width: 100%;
+      }
+      .value{
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: solid 10px rgb(20, 205, 165);
+        height: 200px;
+        width: 200px;
+        border-radius: 100px;
+      }
+      .line{
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 250px;
+        width: 10px;
+        background: linear-gradient(to right, rgb(20, 205, 165), rgb(2, 136, 213));
+      }
+      
+</style>

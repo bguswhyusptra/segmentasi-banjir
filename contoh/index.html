@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="../css/css.css" href="">
+    <title>PERHITUNGAN RUL DAN SOH</title>
+</head>
+<body style="height: 100vh; width: 100%;">
+    <div class="container">
+        <div class="cardheader">
+            <div class="cardchild">
+                <h2>SISTEM MONITORING SOH DAN RUL KENDARAAN LISTRIK</h2>
+                <hr class="line">
+            </div>
+            <form action="{{ url_for('detect') }}" method="post" enctype="multipart/form-data">
+                <div style="text-align: center;">
+                    <button type="submit" class="btnsubmit">Deteksi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+<style>
+    *{
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+        .line {
+            width: 100%;
+            padding: 3px;
+            background-color: black;
+            border-radius: 20px;
+        }
+        .cardheader{
+            display: flex;flex-direction: column;justify-content: center;align-items: center;
+            gap: 50px;
+        }
+        .container{display: flex; flex-direction: column;justify-content: 
+            center;align-items: center;color: aliceblue; 
+            font-family: 'Courier New', Courier, monospace;
+            background-color: rgb(44, 31, 136);
+            height: 100%;
+        }
+        .cardchild{
+            background-color: rgb(23, 23, 76);
+            padding: 20px;
+            height: 40vh;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; gap: 10px;
+        } 
+        form{width: 100%;}
+        .btnsubmit{
+            padding: 10px;
+            width: 30%;
+            height: 10vh;
+            border-radius: 30px;
+            border: none;
+            background-color: blue;
+
+            box-shadow: inset ;
+        }
+    </style>
+</html>

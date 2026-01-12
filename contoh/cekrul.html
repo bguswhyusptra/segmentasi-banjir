@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUL Prediction</title>
+</head>
+
+<body>
+    <div style="padding:2px;">
+        <div class="container">
+        <h1 style="color: white;">Predict RUL (Remaining Useful Life)</h1>
+        <form action="/graph" method="POST">
+            <input type="submit" value="Grafik" class="btn">
+        </form>
+        <form action="/predsoh" method="POST">
+            <input type="submit" value="Cek SOH" class="btn">
+        </form>
+        <form action="/predrul" method="POST">
+            <input type="submit" value="Cek Rul" class="btn">
+        </form>
+        </div>
+    </div>
+</body>
+</html>
+
+<style>
+    
+    .container{
+        width: 100%;height: 100vh; gap: 100px; padding-top: 100px;
+        display: flex;flex-direction: column;align-items: center;
+        background-color: rgb(37, 37, 96);
+    }
+    .part1,.part2{width: 20%;}
+    form{
+        width: 100%;
+        display: flex;flex-direction: row;justify-content: center; gap: 20px;
+    }
+    input{
+        width: 100%;
+        height: 5vh;
+        border-radius: 5px;
+        border: solid 2px;
+        box-shadow: 8px 8px 3px rgba(0, 0, 0, 0.2);
+    }
+    .btn{
+        margin-left: 5%;
+        width: 10%;
+        height: 10vh;
+        border-radius: 10px;
+        border: rgb(117, 133, 196);
+        background-color: rgb(137, 155, 225);
+        box-shadow: 8px 8px 3px rgba(0, 0, 0, 0.2); /* Properti untuk bayangan */
+    }
+    label{color: aliceblue;}
+    .btn:hover{
+        background-color: rgb(59, 80, 165);
+        border: rgb(117, 133, 196);
+    }
+</style>
