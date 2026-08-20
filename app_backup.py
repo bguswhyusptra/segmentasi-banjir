@@ -3,18 +3,8 @@ import cv2
 import sqlite3
 import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, session
-
-# Import TensorFlow dengan error handling
-try:
-    from tensorflow.keras import backend as K
-    from tensorflow.keras.models import load_model
-    TENSORFLOW_AVAILABLE = True
-except Exception as e:
-    print(f"Warning: TensorFlow import failed: {e}")
-    print("Starting in limited mode - prediction features disabled")
-    TENSORFLOW_AVAILABLE = False
-    K = None
-    load_model = None
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import load_model
 
 # =========================
 # KONFIGURASI
@@ -59,8 +49,6 @@ init_db()
 # CUSTOM METRIC
 # =========================
 def dice_coef(y_true, y_pred, smooth=1e-6):
-    if not TENSORFLOW_AVAILABLE:
-        return 0
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
@@ -69,39 +57,28 @@ def dice_coef(y_true, y_pred, smooth=1e-6):
 # =========================
 # LOAD MODEL
 # =========================
-if TENSORFLOW_AVAILABLE:
-    try:
-        unet_model = load_model(
-            UNET_MODEL_PATH,
-            custom_objects={'dice_coef': dice_coef}
-        )
+unet_model = load_model(
+    UNET_MODEL_PATH,
+    custom_objects={'dice_coef': dice_coef}
+)
 
-        attention_model = load_model(
-            ATT_MODEL_PATH,
-            custom_objects={'dice_coef': dice_coef}
-        )
+attention_model = load_model(
+    ATT_MODEL_PATH,
+    custom_objects={'dice_coef': dice_coef}
+)
 
-        backbone_model = load_model(
-            BACKBONE_MODEL_PATH,
-            custom_objects={'dice_coef': dice_coef}
-        )
+backbone_model = load_model(
+    BACKBONE_MODEL_PATH,
+    custom_objects={'dice_coef': dice_coef}
+)
 
-        unet3plus_model = load_model(
-            UNET3PLUS_MODEL_PATH,
-            custom_objects={'dice_coef': dice_coef},
-            compile=False
-        )
+unet3plus_model = load_model(
+    UNET3PLUS_MODEL_PATH,
+    custom_objects={'dice_coef': dice_coef},
+    compile=False
+)
 
-        print("✓ UNet, Attention UNet, UNet Backbone & UNet3+ loaded successfully")
-    except Exception as e:
-        print(f"✗ Error loading models: {e}")
-        TENSORFLOW_AVAILABLE = False
-else:
-    print("✗ Models not loaded - TensorFlow unavailable")
-    unet_model = None
-    attention_model = None
-    backbone_model = None
-    unet3plus_model = None
+print("UNet, Attention UNet, UNet Backbone & UNet3+ loaded")
 
 # =========================
 # IMAGE UTILS
@@ -145,11 +122,8 @@ def calculate_metrics(pred):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        if not username or not password:
-            return render_template('login.html', error="Username dan Password harus diisi")
+        username = request.form['username']
+        password = request.form['password']
 
         conn = sqlite3.connect(DATABASE, timeout=10)
         try:
@@ -174,11 +148,8 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        if not username or not password:
-            return render_template('register.html', error="Username dan Password harus diisi")
+        username = request.form['username']
+        password = request.form['password']
 
         conn = sqlite3.connect(DATABASE, timeout=10)
         try:
@@ -186,7 +157,7 @@ def register():
             c.execute("INSERT INTO users (username, password) VALUES (?,?)",
                       (username, password))
             conn.commit()
-            return render_template('register.html', success="Registrasi berhasil! Silakan login.")
+            return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             return render_template('register.html', error="Username sudah ada")
         finally:
@@ -218,10 +189,6 @@ def dashboard():
 def predict():
     if 'user' not in session:
         return redirect(url_for('login'))
-
-    if not TENSORFLOW_AVAILABLE:
-        return render_template('predict.html', 
-                             error="Prediksi tidak tersedia - TensorFlow tidak dapat dimuat")
 
     if request.method == 'POST':
         if 'image' not in request.files:
