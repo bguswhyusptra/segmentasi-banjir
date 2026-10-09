@@ -1,8 +1,10 @@
 import os
+import time
 import cv2
 import sqlite3
 import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.utils import secure_filename
 
 # Import TensorFlow dengan error handling
 try:
@@ -30,6 +32,13 @@ UNET_MODEL_PATH = 'model/unet_flood_model_final.h5'
 ATT_MODEL_PATH  = 'model/attention_unet_flood.h5'
 BACKBONE_MODEL_PATH = 'model/my_model.h5'
 UNET3PLUS_MODEL_PATH = 'model/unet3plus_best.h5'
+
+MODEL_PATHS = {
+    'U-Net': UNET_MODEL_PATH,
+    'Attention U-Net': ATT_MODEL_PATH,
+    'U-Net Backbone': BACKBONE_MODEL_PATH,
+    'U-Net3+': UNET3PLUS_MODEL_PATH,
+}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
@@ -107,10 +116,14 @@ else:
 # IMAGE UTILS
 # =========================
 def preprocess_image(path):
+    """Prepare an uploaded image for the segmentation models."""
     img = cv2.imread(path)
+    if img is None:
+        raise ValueError("File bukan gambar yang valid atau tidak dapat dibaca")
+
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
-    img = img / 255.0
+    img = img.astype(np.float32) / 255.0
     img = np.expand_dims(img, axis=0)
     return img
 
@@ -137,6 +150,16 @@ def calculate_metrics(pred):
         'total_pixels': mask.shape[0] * mask.shape[1],
         'flood_pixels': int(np.sum(binary_mask))
     }
+
+
+def run_prediction(model, img):
+    start_time = time.perf_counter()
+    pred = model.predict(img, verbose=0)
+    inference_seconds = time.perf_counter() - start_time
+    mask = postprocess_mask(pred)
+    metrics = calculate_metrics(pred)
+    metrics['inference_seconds'] = round(inference_seconds, 4)
+    return pred, mask, metrics
 
 # =========================
 # LOGIN
@@ -228,40 +251,72 @@ def predict():
             return render_template('predict.html', error="No file")
 
         file = request.files['image']
-        filename = file.filename
+        filename = secure_filename(file.filename)
+        if not filename:
+            return render_template('predict.html', error="Nama file tidak valid")
 
         upload_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(upload_path)
 
-        img = preprocess_image(upload_path)
+        try:
+            img = preprocess_image(upload_path)
+        except (ValueError, cv2.error) as e:
+            return render_template('predict.html', error=str(e))
 
         # UNET
-        unet_pred = unet_model.predict(img)
-        unet_mask = postprocess_mask(unet_pred)
+        unet_pred, unet_mask, unet_metrics = run_prediction(unet_model, img)
         unet_path = os.path.join(RESULT_FOLDER, f"unet_{filename}")
         cv2.imwrite(unet_path, unet_mask)
-        unet_metrics = calculate_metrics(unet_pred)
 
         # ATTENTION UNET
-        att_pred = attention_model.predict(img)
-        att_mask = postprocess_mask(att_pred)
+        att_pred, att_mask, att_metrics = run_prediction(attention_model, img)
         att_path = os.path.join(RESULT_FOLDER, f"attention_{filename}")
         cv2.imwrite(att_path, att_mask)
-        att_metrics = calculate_metrics(att_pred)
 
         # UNET BACKBONE
-        backbone_pred = backbone_model.predict(img)
-        backbone_mask = postprocess_mask(backbone_pred)
+        backbone_pred, backbone_mask, backbone_metrics = run_prediction(backbone_model, img)
         backbone_path = os.path.join(RESULT_FOLDER, f"backbone_{filename}")
         cv2.imwrite(backbone_path, backbone_mask)
-        backbone_metrics = calculate_metrics(backbone_pred)
 
         # UNET3PLUS
-        unet3plus_pred = unet3plus_model.predict(img)
-        unet3plus_mask = postprocess_mask(unet3plus_pred)
+        unet3plus_pred, unet3plus_mask, unet3plus_metrics = run_prediction(unet3plus_model, img)
         unet3plus_path = os.path.join(RESULT_FOLDER, f"unet3plus_{filename}")
         cv2.imwrite(unet3plus_path, unet3plus_mask)
-        unet3plus_metrics = calculate_metrics(unet3plus_pred)
+
+        comparison_rows = [
+            {
+                'model': 'U-Net',
+                'model_size_mb': round(os.path.getsize(MODEL_PATHS['U-Net']) / (1024 ** 2), 2),
+                'parameters': unet_model.count_params(),
+                'inference_seconds': unet_metrics['inference_seconds'],
+                'flood_percentage': unet_metrics['flood_percentage'],
+                'confidence': unet_metrics['confidence'],
+            },
+            {
+                'model': 'Attention U-Net',
+                'model_size_mb': round(os.path.getsize(MODEL_PATHS['Attention U-Net']) / (1024 ** 2), 2),
+                'parameters': attention_model.count_params(),
+                'inference_seconds': att_metrics['inference_seconds'],
+                'flood_percentage': att_metrics['flood_percentage'],
+                'confidence': att_metrics['confidence'],
+            },
+            {
+                'model': 'U-Net Backbone',
+                'model_size_mb': round(os.path.getsize(MODEL_PATHS['U-Net Backbone']) / (1024 ** 2), 2),
+                'parameters': backbone_model.count_params(),
+                'inference_seconds': backbone_metrics['inference_seconds'],
+                'flood_percentage': backbone_metrics['flood_percentage'],
+                'confidence': backbone_metrics['confidence'],
+            },
+            {
+                'model': 'U-Net3+',
+                'model_size_mb': round(os.path.getsize(MODEL_PATHS['U-Net3+']) / (1024 ** 2), 2),
+                'parameters': unet3plus_model.count_params(),
+                'inference_seconds': unet3plus_metrics['inference_seconds'],
+                'flood_percentage': unet3plus_metrics['flood_percentage'],
+                'confidence': unet3plus_metrics['confidence'],
+            },
+        ]
 
         return render_template(
             'predict.html',
@@ -273,7 +328,8 @@ def predict():
             unet_metrics=unet_metrics,
             att_metrics=att_metrics,
             backbone_metrics=backbone_metrics,
-            unet3plus_metrics=unet3plus_metrics
+            unet3plus_metrics=unet3plus_metrics,
+            comparison_rows=comparison_rows
         )
 
     return render_template('predict.html')
