@@ -43,7 +43,7 @@ MODEL_PATHS = {
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='Menu')
 app.secret_key = "flood_secret_key"
 
 # =========================
